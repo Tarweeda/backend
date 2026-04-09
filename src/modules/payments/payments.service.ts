@@ -6,7 +6,12 @@ export class PaymentsService {
   private stripe: Stripe;
 
   constructor() {
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      console.warn('STRIPE_SECRET_KEY is not set – payment features will be unavailable');
+      return;
+    }
+    this.stripe = new Stripe(key, {
       apiVersion: '2025-04-30.basil' as any,
     });
   }
