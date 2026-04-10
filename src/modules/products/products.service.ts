@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { getSupabase } from '../../config/supabase.config';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -19,6 +21,15 @@ export class ProductsService {
     }
 
     const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  }
+
+  async findAllAdmin() {
+    const { data, error } = await this.db
+      .from('products')
+      .select('*')
+      .order('sort_order');
     if (error) throw error;
     return data;
   }
@@ -45,7 +56,7 @@ export class ProductsService {
     return data;
   }
 
-  async create(dto: any) {
+  async create(dto: CreateProductDto) {
     const { data, error } = await this.db
       .from('products')
       .insert(dto)
@@ -55,7 +66,7 @@ export class ProductsService {
     return data;
   }
 
-  async update(id: string, dto: any) {
+  async update(id: string, dto: UpdateProductDto) {
     const { data, error } = await this.db
       .from('products')
       .update({ ...dto, updated_at: new Date().toISOString() })

@@ -102,4 +102,15 @@ export class BookingsService {
     if (error) throw error;
     return data;
   }
+
+  async updateStatus(id: string, bookingStatus: string) {
+    const { data, error } = await this.db
+      .from('supper_bookings')
+      .update({ booking_status: bookingStatus, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  }
 }
