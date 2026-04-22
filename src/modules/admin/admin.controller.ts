@@ -1,4 +1,5 @@
-import { Controller, Post, Get, Patch, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { OrdersService } from '../orders/orders.service';
 import { BookingsService } from '../bookings/bookings.service';
@@ -35,6 +36,18 @@ export class AdminController {
   @Post('login')
   login(@Body() body: { email: string; password: string }) {
     return this.adminService.login(body.email, body.password);
+  }
+
+  @Public()
+  @Post('refresh')
+  refresh(@Body() body: { refresh_token: string }) {
+    return this.adminService.refresh(body.refresh_token);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    return this.adminService.uploadImage(file);
   }
 
   // Products
