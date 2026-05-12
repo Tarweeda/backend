@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { HireService } from './hire.service';
+import { CreateHireEnquiryDto } from './dto/create-hire-enquiry.dto';
 
 @Controller('hire')
 export class HireController {
@@ -9,5 +10,5 @@ export class HireController {
   findAllRoles() { return this.hireService.findAllRoles(); }
 
   @Post('enquiries')
-  createEnquiry(@Body() dto: any) { return this.hireService.createEnquiry(dto); }
+  createEnquiry(@Body() dto: CreateHireEnquiryDto) { return this.hireService.createEnquiry(dto); }
 }

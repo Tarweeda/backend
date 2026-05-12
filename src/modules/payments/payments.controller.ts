@@ -1,6 +1,7 @@
 import { Controller, Post, Req, Res, Headers } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { getSupabase } from '../../config/supabase.config';
+import type { RawBodyRequest } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
 @Controller('payments')
@@ -9,14 +10,15 @@ export class PaymentsController {
 
   @Post('webhook')
   async handleWebhook(
-    @Req() req: Request,
+    @Req() req: RawBodyRequest<Request>,
     @Res() res: Response,
     @Headers('stripe-signature') signature: string,
   ) {
     let event;
     try {
+      // Use rawBody (Buffer) for correct Stripe signature verification
       event = this.paymentsService.constructWebhookEvent(
-        req.body,
+        req.rawBody!,
         signature,
       );
     } catch (err) {

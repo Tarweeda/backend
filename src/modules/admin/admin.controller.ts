@@ -1,4 +1,5 @@
-import { Controller, Post, Get, Patch, Delete, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { OrdersService } from '../orders/orders.service';
@@ -33,6 +34,7 @@ export class AdminController {
   ) {}
 
   @Public()
+  @Throttle({ auth: { ttl: 60000, limit: 5 } })  // 5 attempts per minute
   @Post('login')
   login(@Body() body: { email: string; password: string }) {
     return this.adminService.login(body.email, body.password);
@@ -45,8 +47,19 @@ export class AdminController {
   }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: { fileSize: 5 * 1024 * 1024 },  // 5 MB max
+    fileFilter: (_req, file, cb) => {
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (allowed.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only JPEG, PNG, WebP and GIF images are allowed'), false);
+      }
+    },
+  }))
   uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new Error('No valid file uploaded');
     return this.adminService.uploadImage(file);
   }
 
@@ -127,6 +140,8 @@ export class AdminController {
 
   @Patch('orders/:id/status')
   updateOrderStatus(@Param('id') id: string, @Body() body: { order_status: string }) {
+    const valid = ['received', 'preparing', 'ready', 'dispatched', 'delivered', 'cancelled'];
+    if (!valid.includes(body.order_status)) throw new BadRequestException('Invalid order status');
     return this.ordersService.updateStatus(id, body.order_status);
   }
 
@@ -143,6 +158,8 @@ export class AdminController {
 
   @Patch('bookings/:id/status')
   updateBookingStatus(@Param('id') id: string, @Body() body: { booking_status: string }) {
+    const valid = ['confirmed', 'cancelled', 'waitlisted', 'attended', 'no_show'];
+    if (!valid.includes(body.booking_status)) throw new BadRequestException('Invalid booking status');
     return this.bookingsService.updateStatus(id, body.booking_status);
   }
 
@@ -177,6 +194,8 @@ export class AdminController {
 
   @Patch('catering/enquiries/:id')
   async updateCateringStatus(@Param('id') id: string, @Body() body: { status: string }) {
+    const valid = ['new', 'in_review', 'quoted', 'confirmed', 'declined'];
+    if (!valid.includes(body.status)) throw new BadRequestException('Invalid enquiry status');
     const { data, error } = await getSupabase().from('catering_enquiries').update({ status: body.status, updated_at: new Date().toISOString() }).eq('id', id).select().single();
     if (error) throw error;
     return data;
@@ -192,6 +211,8 @@ export class AdminController {
 
   @Patch('hire/enquiries/:id')
   async updateHireStatus(@Param('id') id: string, @Body() body: { status: string }) {
+    const valid = ['new', 'in_review', 'quoted', 'confirmed', 'declined'];
+    if (!valid.includes(body.status)) throw new BadRequestException('Invalid enquiry status');
     const { data, error } = await getSupabase().from('hire_enquiries').update({ status: body.status, updated_at: new Date().toISOString() }).eq('id', id).select().single();
     if (error) throw error;
     return data;
