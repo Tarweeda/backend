@@ -1,12 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { getSupabase } from '../../config/supabase.config';
+import { getSupabase, getSupabaseAuth } from '../../config/supabase.config';
 
 @Injectable()
 export class AdminService {
   private get db() { return getSupabase(); }
+  private get auth() { return getSupabaseAuth(); }
 
   async login(email: string, password: string) {
-    const { data, error } = await this.db.auth.signInWithPassword({ email, password });
+    const { data, error } = await this.auth.auth.signInWithPassword({ email, password });
     if (error) throw new UnauthorizedException('Invalid credentials');
 
     const user = data.user;
@@ -20,7 +21,7 @@ export class AdminService {
   }
 
   async refresh(refreshToken: string) {
-    const { data, error } = await this.db.auth.refreshSession({ refresh_token: refreshToken });
+    const { data, error } = await this.auth.auth.refreshSession({ refresh_token: refreshToken });
     if (error || !data.session) throw new UnauthorizedException('Session expired');
 
     const user = data.user;

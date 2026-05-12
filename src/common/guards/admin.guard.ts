@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { getSupabase } from '../../config/supabase.config';
+import { getSupabaseAuth } from '../../config/supabase.config';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class AdminGuard implements CanActivate {
     const {
       data: { user },
       error,
-    } = await getSupabase().auth.getUser(token);
+    } = await getSupabaseAuth().auth.getUser(token);
     if (error || user?.user_metadata?.role !== 'admin') {
       throw new UnauthorizedException();
     }
