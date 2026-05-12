@@ -7,9 +7,10 @@ import { ProductsModule } from '../products/products.module';
 import { EventsModule } from '../events/events.module';
 import { HampersModule } from '../hampers/hampers.module';
 import { PackagesModule } from '../packages/packages.module';
+import { SiteContentModule } from '../site-content/site-content.module';
 
 @Module({
-  imports: [OrdersModule, BookingsModule, ProductsModule, EventsModule, HampersModule, PackagesModule],
+  imports: [OrdersModule, BookingsModule, ProductsModule, EventsModule, HampersModule, PackagesModule, SiteContentModule],
   controllers: [AdminController],
   providers: [AdminService],
 })

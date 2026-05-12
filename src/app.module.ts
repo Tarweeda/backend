@@ -12,6 +12,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { EmailModule } from './modules/email/email.module';
+import { SiteContentModule } from './modules/site-content/site-content.module';
 import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { AdminModule } from './modules/admin/admin.module';
     OrdersModule,
     BookingsModule,
     PaymentsModule,
+    SiteContentModule,
     AdminModule,
   ],
   providers: [

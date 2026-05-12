@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Delete, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Put, Delete, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
@@ -8,6 +8,8 @@ import { ProductsService } from '../products/products.service';
 import { EventsService } from '../events/events.service';
 import { HampersService } from '../hampers/hampers.service';
 import { PackagesService } from '../packages/packages.service';
+import { SiteContentService } from '../site-content/site-content.service';
+import { UpdateSiteContentDto } from '../site-content/dto/update-site-content.dto';
 import { getSupabase } from '../../config/supabase.config';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { Public } from '../../common/decorators/public.decorator';
@@ -31,6 +33,7 @@ export class AdminController {
     private readonly eventsService: EventsService,
     private readonly hampersService: HampersService,
     private readonly packagesService: PackagesService,
+    private readonly siteContentService: SiteContentService,
   ) {}
 
   @Public()
@@ -182,6 +185,17 @@ export class AdminController {
   @Delete('hampers/:id')
   deleteHamper(@Param('id') id: string) {
     return this.hampersService.remove(id);
+  }
+
+  // Site content (CMS)
+  @Get('site-content')
+  getSiteContent() {
+    return this.siteContentService.findAll();
+  }
+
+  @Put('site-content/:key')
+  updateSiteContent(@Param('key') key: string, @Body() dto: UpdateSiteContentDto) {
+    return this.siteContentService.upsert(key, dto.value);
   }
 
   // Catering enquiries
