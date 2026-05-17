@@ -23,6 +23,11 @@ export class OrdersService {
       if (!product.in_stock) {
         throw new BadRequestException(`${product.name} is out of stock`);
       }
+      if ((product.quantity ?? 0) < item.quantity) {
+        throw new BadRequestException(
+          `Insufficient stock for ${product.name} (${product.quantity ?? 0} available)`,
+        );
+      }
       const lineTotalPence = product.price_pence * item.quantity;
       subtotalPence += lineTotalPence;
       orderItems.push({
@@ -70,6 +75,28 @@ export class OrdersService {
     }));
     const { error: itemsError } = await this.db.from('order_items').insert(itemsWithOrder);
     if (itemsError) throw itemsError;
+
+    // 4b. Deduct stock and record OUT movements
+    for (const item of orderItems) {
+      const { data: product } = await this.db
+        .from('products')
+        .select('quantity, low_stock_threshold')
+        .eq('id', item.product_id)
+        .single();
+
+      const newQty = Math.max(0, (product?.quantity ?? 0) - item.quantity);
+      const updates: Record<string, unknown> = { quantity: newQty, updated_at: new Date().toISOString() };
+      if (newQty === 0) updates.in_stock = false;
+
+      await this.db.from('products').update(updates).eq('id', item.product_id);
+      await this.db.from('stock_movements').insert({
+        product_id: item.product_id,
+        type: 'OUT',
+        quantity: item.quantity,
+        reference_id: order.id,
+        reason: `Order ${order.id}`,
+      });
+    }
 
     // 5. Create Stripe PaymentIntent
     const paymentIntent = await this.paymentsService.createPaymentIntent(totalPence, {

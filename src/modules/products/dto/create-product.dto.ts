@@ -7,6 +7,7 @@ import {
   Min,
 } from 'class-validator';
 
+
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
@@ -51,4 +52,22 @@ export class CreateProductDto {
   @IsOptional()
   @IsInt()
   sort_order?: number;
+
+  @IsInt()
+  @Min(0)
+  initial_quantity: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  low_stock_threshold?: number;
+
+  @IsOptional()
+  @IsString()
+  sku?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  cost_price_pence?: number;
 }

@@ -57,12 +57,25 @@ export class ProductsService {
   }
 
   async create(dto: CreateProductDto) {
+    const { initial_quantity, ...productFields } = dto;
+    const quantity = initial_quantity ?? 0;
+
     const { data, error } = await this.db
       .from('products')
-      .insert(dto)
+      .insert({ ...productFields, quantity, in_stock: quantity > 0 })
       .select()
       .single();
     if (error) throw error;
+
+    if (quantity > 0) {
+      await this.db.from('stock_movements').insert({
+        product_id: data.id,
+        type: 'IN',
+        quantity,
+        reason: 'Initial stock on product creation',
+      });
+    }
+
     return data;
   }
 

@@ -14,6 +14,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { EmailModule } from './modules/email/email.module';
 import { SiteContentModule } from './modules/site-content/site-content.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AdminModule } from './modules/admin/admin.module';
     PaymentsModule,
     SiteContentModule,
     AdminModule,
+    InventoryModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
