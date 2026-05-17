@@ -29,4 +29,14 @@ export class CreateCateringEnquiryDto {
   @IsString()
   @MaxLength(2000)
   message?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  selected_set?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  selected_items?: string;
 }
