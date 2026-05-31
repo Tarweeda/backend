@@ -12,13 +12,21 @@ async function bootstrap() {
   // Security headers: XSS protection, clickjacking, MIME sniffing, etc.
   app.use(helmet());
 
-  const allowedOrigin = process.env.CORS_ORIGIN;
-  if (!allowedOrigin) {
+  const corsOrigin = process.env.CORS_ORIGIN;
+  if (!corsOrigin) {
     throw new Error('CORS_ORIGIN env variable is not set');
   }
 
+  const allowedOrigins = corsOrigin.split(',').map((o) => o.trim());
+
   app.enableCors({
-    origin: allowedOrigin,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin ${origin} not allowed`));
+      }
+    },
     credentials: true,
   });
 
