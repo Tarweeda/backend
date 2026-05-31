@@ -14,7 +14,7 @@ export class InventoryService {
   async getSummary() {
     const { data: products, error } = await this.db
       .from('products')
-      .select('quantity, low_stock_threshold, cost_price_pence, price_pence, in_stock');
+      .select('id, name, quantity, low_stock_threshold, cost_price_pence, price_pence, in_stock');
     if (error) throw error;
 
     const total = products.length;
