@@ -7,7 +7,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { InventoryService } from './inventory.service';
 import { RestockDto } from './dto/restock.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
